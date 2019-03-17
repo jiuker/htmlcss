@@ -67,3 +67,5 @@ willInsertHere!
 * 重构部分逻辑，让维护不会那么困难（就是写得丑了）。
 * 增加拓展功能，让写拓展也是一种乐趣，比如增加动画联动，一句代码搞定什么的 myTransitton-10-20 -> @-webkit-transframe{0%{top:10px;}}。
 * 对react的支持，或者出一个react版本。
+## 讨论
+* qq群 941057162
