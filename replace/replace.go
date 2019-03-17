@@ -3,11 +3,12 @@ package replace
 import (
 	"errors"
 	"fmt"
-	myConfig "htmlcss/config"
-	myHttp "htmlcss/http"
 	"io/ioutil"
 	"log"
 	"path/filepath"
+
+	myConfig "github.com/jiuker/htmlcss/config"
+	myHttp "github.com/jiuker/htmlcss/http"
 
 	"strconv"
 

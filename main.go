@@ -1,17 +1,17 @@
 package main
 
 import (
-	myConfig "htmlcss/config"
-	myHttp "htmlcss/http"
-	"htmlcss/replace"
-	myReplace "htmlcss/replace"
-	"htmlcss/watcher"
 	"strings"
+
+	myConfig "github.com/jiuker/htmlcss/config"
+	myHttp "github.com/jiuker/htmlcss/http"
+	"github.com/jiuker/htmlcss/replace"
+	"github.com/jiuker/htmlcss/watcher"
 )
 
 func main() {
 	//初始化正则
-	myReplace.Init()
+	replace.Init()
 	//watcher模块开始工作
 	if myConfig.Params.Mode != "none" {
 		if strings.Contains(myConfig.Params.Replace, "append-") {

@@ -3,13 +3,15 @@ package http
 import (
 	"bufio"
 	"fmt"
-	myConfig "htmlcss/config"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
+
+	myConfig "github.com/jiuker/htmlcss/config"
 
 	"github.com/gorilla/websocket"
 )
@@ -225,6 +227,10 @@ func ListenAndServe() {
 		}
 
 	})
+	//为apicloud平台添加文件目录
+	h := http.FileServer(http.Dir(myConfig.Params.Dir))
+	dirName:=filepath.Base(http.Dir(myConfig.Params.Dir)
+	http.Handle(fmt.Sprintf("/%s/",dirName), http.StripPrefix(fmt.Sprintf("/%s/",dirName), h))
 	err := http.ListenAndServe(myConfig.Params.ServerIpPort, nil)
 	if err != nil {
 		log.Fatalln(err)
@@ -267,7 +273,7 @@ func init() {
 
 var SyncJs = `if(true) { //debug js
     //server address
-    window.DebugServer = 'http://` + strings.SplitN(myConfig.Params.ServerIpPort, ":", 2)[0] + `:8020/byyl/';
+    window.DebugServer = 'http://`+myConfig.Params.ServerIpPort+ `/`+filepath.Base(http.Dir(myConfig.Params.Dir)+`/';
     function c() {
         var willConsole = "";
         for(var i = 0; i < arguments.length; i++) {

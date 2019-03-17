@@ -2,13 +2,14 @@ package watcher
 
 import (
 	"fmt"
-	myConfig "htmlcss/config"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	myConfig "github.com/jiuker/htmlcss/config"
 )
 
 var fileModTime = map[string]time.Time{}
