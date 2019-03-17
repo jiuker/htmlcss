@@ -48,7 +48,7 @@ willInsertHere!
 ### 单位转换
 * 在配置文件里面convert=auto[2px]，那么 style节点加一个参数为 px="4"，那么实际以4px进行换算。配置里面单位是什么，单个文件里面的属性为这个才会生效。
 * 如果是self就会强制使用配置的单位和比例。
-* attr为只以页面配置为准，如果页面没有，就会以1p来处理。
+* attr为只以页面配置为准，如果页面没有，就会以1px来处理。
 ### commonCalss公共class
 * 作用只是替换里面的class属性，比如 c-class="body{h100 w100}",工具就会识别为body{width:100%;height:100%;}
 ### dir需要处理的目录
