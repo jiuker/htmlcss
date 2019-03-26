@@ -337,11 +337,6 @@ var SyncJs = `if(true) { //debug js
     window.__defineSetter__("apiready", function(v) {
         window._apiready = v;
     });
-    setTimeout(function(){
-        window.apicloseWin=function(){
-            api.closeWin();
-        }
-    },0);
     var apireadyTime = 0;
     function l(target,key,tname){
         var showName = ''
@@ -398,38 +393,6 @@ var SyncJs = `if(true) { //debug js
         if(apireadyTime != 0) {
 			
         } else {
-			window.onerror=function(){
-				if(arguments[0].indexOf('未登录')!=-1){ //未登录
-					api.alert({
-						title: '您需要登陆',
-						msg: '立即登陆',
-					}, function(ret, err) {
-						apiopenWin({
-							name:"login",
-							url:"widget://html/user/login.html",
-							pageParam:{
-								title:"登陆"
-							}
-						},'commonHeader')
-					});
-				}else if(arguments[0].indexOf('登陆信息异常')!=-1){ //登陆信息异常
-					api.alert({
-						title: '登陆信息异常',
-						msg: '立即登陆',
-					}, function(ret, err) {
-						apiopenWin({
-							name:"login",
-							url:"widget://html/user/login.html",
-							pageParam:{
-								title:"登陆"
-							}
-						},'commonHeader')
-					});
-				}else{
-					ce("js error -------------", arguments);
-				}
-				return false   //弹出错误提示.
-		    };
             l(api,['ajax', 'openWin','openFrame','openFrameGroup','execScript','addEventListener','sendEvent'],'api');
             apireadyTime++;
         };
@@ -439,7 +402,7 @@ var SyncJs = `if(true) { //debug js
 			document.querySelector("head").insertAdjacentHTML("afterBegin",'<base href="'+window.location.href+'" />')
             ajaxDebugData('urlChageData',encodeURIComponent(document.querySelector("html").innerHTML))
         });
-        if(api.winName == "main") {
+        if(api.winName == "root") {
             if(api.frameName==''){
                 api.addEventListener({
                     name: 'longpress'
