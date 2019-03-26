@@ -248,7 +248,7 @@ func init() {
 	tpl := `this.regexps.push({
             rp: new RegExp(/^%s$/),
             rep: "%s"
-        })`
+        });`
 	reader := bufio.NewReader(osFile)
 	_, err = reader.Peek(1)
 	if err != nil {
