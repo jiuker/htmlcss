@@ -22,7 +22,11 @@ func main() {
 			replace.BtyeToCss(allFileByte, "公共路径!")
 		} else {
 			watcher.Handle(func(path string) {
-				replace.FindFileToGetCss(path)
+				if strings.Contains(path, ".js") && myConfig.Params.React != "none" {
+					replace.FindPathToString(path)
+				} else {
+					replace.FindFileToGetCss(path)
+				}
 			})
 		}
 	} else { //只是监听js

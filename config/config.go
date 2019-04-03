@@ -19,6 +19,8 @@ type Conf struct {
 	IgnoreSplit  string // 单页面的中间切分标志，如果没有则当作全部替换，如果有则指替换标志下面的，none为空
 	Class        string //单独的class处理
 	CommonClass  string // 公共的class
+	React        string //后缀名为js，就是使用这个none为普通js，其他则为对应的应用
+	ReactMode    string //生成多个还是单个的区别
 }
 
 var Params = Conf{}
@@ -73,6 +75,14 @@ func init() {
 		log.Fatalln(err)
 	}
 	Params.CommonClass, err = cfg.String("csshandle", "commonCalss")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	Params.React, err = cfg.String("handle", "react")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	Params.ReactMode, err = cfg.String("handle", "reactmode")
 	if err != nil {
 		log.Fatalln(err)
 	}

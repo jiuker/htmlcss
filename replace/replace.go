@@ -132,7 +132,7 @@ func FindFileToGetCss(path string) {
 }
 func BtyeToCss(fileBody []byte, path string) {
 	var css = ""
-	var err = errors.New("")
+
 	var defaultCss = map[string]int{}
 	var countIndex = 1
 	fileBodyStr := string(fileBody)
@@ -236,50 +236,7 @@ func BtyeToCss(fileBody []byte, path string) {
 			willCompareCss = cssSplit[1]
 		}
 	}
-	//转换成程序可识别的单位zzzz
-	//转换 已经识别的css：css
-	css = strings.Replace(css, "px", "zzzz", -1)
-	var unit = ""
-	var baseFloat float64 = 0.0 //这个基数是哪里获取
-	switch Ctype {
-	case "auto": //优先attr，再self
-		attrUnit := regexp.MustCompile(fmt.Sprintf(`%s="([^"]+)"`, Unit)).FindAllStringSubmatch(compare[1], -1)
-		if len(attrUnit) == 0 { //不存在配置，就使用attr
-			unit = Unit
-			baseFloat = BaseFloat
-			break
-		}
-		unit = Unit
-		baseFloat, err = strconv.ParseFloat(attrUnit[0][1], 64)
-		if err != nil {
-			baseFloat = 1.0
-			break
-		}
-	case "self": //强制使用配置文件的单位
-		unit = Unit
-		baseFloat = BaseFloat
-	case "attr": //使用参数节点参数配置
-		attrUnit := regexp.MustCompile(fmt.Sprintf(`%s="([^"]+)"`, Unit)).FindAllStringSubmatch(compare[1], -1)
-		if len(attrUnit) == 0 { //不存在配置，就是用px，1.0为默认
-			unit = "px"
-			baseFloat = 1.0
-			break
-		}
-		unit = Unit
-		baseFloat, err = strconv.ParseFloat(attrUnit[0][1], 64)
-		if err != nil {
-			baseFloat = 1.0
-			break
-		}
-	}
-	css = regexp.MustCompile(`(\d+)zzzz`).ReplaceAllStringFunc(css, func(s string) string {
-		var ts = strings.Replace(s, "zzzz", "", -1)
-		ti, err := strconv.Atoi(ts)
-		if err != nil {
-			return s
-		}
-		return fmt.Sprintf("%v%s", float64(ti)*baseFloat, unit)
-	})
+	css = cssToCover(css, compare)
 	switch myConfig.Params.Replace {
 	case "node":
 		if !isTheSame(css, willCompareCss) { //生成的css和比较的css存在差异
@@ -344,16 +301,53 @@ func BtyeToCss(fileBody []byte, path string) {
 		}
 	}
 }
-func isTheSame(str, str1 string) (same bool) {
-	compareStr := `1234567890-=qwertyuiop[]\asdfghjkl;'zxcvbnm,./!*@`
-	for _, v := range compareStr {
-		if strings.Count(str, string(v)) == strings.Count(str1, string(v)) {
 
-		} else {
-			same = false
-			return
+// width:10px => width:0.1rem
+func cssToCover(css string, compare []string) string {
+	//转换成程序可识别的单位zzzz
+	//转换 已经识别的css：css
+	css = strings.Replace(css, "px", "zzzz", -1)
+	var unit = ""
+	var baseFloat float64 = 0.0 //这个基数是哪里获取
+	var err = errors.New("")
+	switch Ctype {
+	case "auto": //优先attr，再self
+		attrUnit := regexp.MustCompile(fmt.Sprintf(`%s="([^"]+)"`, Unit)).FindAllStringSubmatch(compare[1], -1)
+		if len(attrUnit) == 0 { //不存在配置，就使用self
+			unit = Unit
+			baseFloat = BaseFloat
+			break
+		}
+		unit = Unit
+		baseFloat, err = strconv.ParseFloat(attrUnit[0][1], 64)
+		if err != nil {
+			baseFloat = 1.0
+			break
+		}
+	case "self": //强制使用配置文件的单位
+		unit = Unit
+		baseFloat = BaseFloat
+	case "attr": //使用参数节点参数配置
+		attrUnit := regexp.MustCompile(fmt.Sprintf(`%s="([^"]+)"`, Unit)).FindAllStringSubmatch(compare[1], -1)
+		if len(attrUnit) == 0 { //不存在配置，就是用px，1.0为默认
+			unit = "px"
+			baseFloat = 1.0
+			break
+		}
+		unit = Unit
+		baseFloat, err = strconv.ParseFloat(attrUnit[0][1], 64)
+		if err != nil {
+			baseFloat = 1.0
+			break
 		}
 	}
-	same = true
-	return
+	css = regexp.MustCompile(`(\d+)zzzz`).ReplaceAllStringFunc(css, func(s string) string {
+		var ts = strings.Replace(s, "zzzz", "", -1)
+		ti, err := strconv.Atoi(ts)
+		if err != nil {
+			return s
+		}
+		return fmt.Sprintf("%v%s", float64(ti)*baseFloat, unit)
+	})
+	return css
 }

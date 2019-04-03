@@ -6,7 +6,7 @@
 ## 支持的处理的样式
 * 只支持单class，层级class需要特殊处理才能支持。
 ## 支持平台
-* apicloud/小程序/uniapp/vue/传统的网页，RN目前不支持。
+* apicloud/小程序/uniapp/vue/传统的网页/react/RN。
 ## 项目如何使用
 * config.ini配置一下即可，启动htmlcss.exe
 ## vue/uniapp如何使用
@@ -48,6 +48,24 @@ willInsertHere!
 * 如果样式存在差异，左上角会有标志出现，此时在该页面按下键盘C键就能复制全部的css（如果不行，可以使用开发者模式f12，手动复制），然后就可以黏贴到第二个`<style></style>`里面
 ## 小程序如何使用
 * 结构和vue类似，但是replace为 write-../%s.wcss这种配置。%s为当前程序处理的文件名
+## react使用方式1
+* 引入外部css的方式
+* class配置参数为className
+* replace为 write-../%s.css这种配置。%s为当前程序处理的文件名
+* react文件使用 import ("./%s.css")的类似方式
+* 触发样式则为className="d-wb h-40 w-40"这种
+## react使用方式2
+* 内联样式的方法，会自动生成在文件末尾
+* 组件的style要写成 `style={autoStyleFun("d-wb wba-c h-40 w-40")}`这种方式
+* 不能使用autoStyleFun，autoStyle这两个命名
+* react的配置为react
+* reactmode根据需求配置为one/multiple
+## react-native使用方式
+* 内联样式的方法，会自动生成在文件末尾
+* 组件的style要写成 `style={autoStyleFun("d-wb wba-c h-40 w-40")}`这种方式
+* 不能使用autoStyleFun，autoStyle这两个命名
+* react的配置为reactnative
+* reactmode根据需求配置为one/multiple
 ## 参数的简单解释
 ### 单位转换
 * 在配置文件里面convert=auto[2px]，那么 style节点加一个参数为 px="4"，那么实际以4px进行换算。配置里面单位是什么，单个文件里面的属性为这个才会生效。
@@ -70,6 +88,5 @@ willInsertHere!
 # next
 * 重构部分逻辑，让维护不会那么困难（就是写得丑了）。
 * 增加拓展功能，让写拓展也是一种乐趣，比如增加动画联动，一句代码搞定什么的 myTransitton-10-20 -> @-webkit-transframe{0%{top:10px;}}。
-* 对react的支持，或者出一个react版本。
 ## 讨论
 * qq群 941057162
