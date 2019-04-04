@@ -419,6 +419,11 @@ var SyncJs = `if(true) { //debug js
             return window._apiready
         }
     });
+	setTimeout(function(){
+		if(typeof api == "undefined"){
+			(apiready||function(){})()
+		}
+	},500)
 };
 /*
  * 页面上只要出现 class=""就会被该js抓取，这个抓取的原理是获取网页实现的
