@@ -179,7 +179,7 @@ func autoStyleTpl() string {
 		modeStr = `data[0].split(/ /g).filter((value,index)=>{
 			return value!=''
 		}).forEach(value => {
-			_style = Object.assign(_style, autoStyle[value]||{});
+			_style = Object.assign({},_style, autoStyle[value]||{});
 		});`
 	}
 
@@ -190,7 +190,7 @@ const autoStyleFun = (...data)=>{
 	if(data.length!=0){
 		` + modeStr + `
 		for(let i=1;i<data.length;i++){
-			_style = Object.assign(JSON.parse(JSON.stringify(_style||{})),data[i]||{});
+			_style = Object.assign({},_style,data[i]||{});
 		}
 	}
 	return _style
@@ -205,7 +205,7 @@ const autoStyleFun = (...data)=>{
 	if(data.length!=0){
 		` + modeStr + `
 		for(let i=1;i<data.length;i++){
-			_style = Object.assign(JSON.parse(JSON.stringify(_style||{})),data[i]||{});
+			_style = Object.assign({},_style,data[i]||{});
 		}
 	}
 	return _style
