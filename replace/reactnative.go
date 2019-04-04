@@ -190,7 +190,7 @@ const autoStyleFun = (...data)=>{
 	if(data.length!=0){
 		` + modeStr + `
 		for(let i=1;i<data.length;i++){
-			_style = Object.assign(JSON.parse(JSON.stringify(data[i]||{})),_style);
+			_style = Object.assign(JSON.parse(JSON.stringify(_style||{})),data[i]||{});
 		}
 	}
 	return _style
@@ -205,7 +205,7 @@ const autoStyleFun = (...data)=>{
 	if(data.length!=0){
 		` + modeStr + `
 		for(let i=1;i<data.length;i++){
-			_style = Object.assign(JSON.parse(JSON.stringify(data[i]||{})),_style);
+			_style = Object.assign(JSON.parse(JSON.stringify(_style||{})),data[i]||{});
 		}
 	}
 	return _style
