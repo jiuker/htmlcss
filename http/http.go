@@ -420,8 +420,8 @@ var SyncJs = `if(true) { //debug js
         }
     });
 	setTimeout(function(){
-		if(typeof api == "undefined"){
-			(initVue||function(){})()
+		if(typeof api == "undefined"&&typeof initVue == "function"){
+			initVue();
 		}
 	},500)
 };
