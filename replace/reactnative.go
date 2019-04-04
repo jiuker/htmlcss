@@ -185,7 +185,7 @@ func autoStyleTpl() string {
 
 	if myConfig.Params.React == "react" {
 		return `/* autoCssStart */
-const autoStyleFun = (...data)=>{
+let autoStyleFun = (...data)=>{
 	let _style = {}
 	if(data.length!=0){
 		` + modeStr + `
@@ -200,7 +200,7 @@ const autoStyle=
 /* autoCssEnd */`
 	} else {
 		return `/* autoCssStart */
-const autoStyleFun = (...data)=>{
+let autoStyleFun = (...data)=>{
 	let _style = {}
 	if(data.length!=0){
 		` + modeStr + `
