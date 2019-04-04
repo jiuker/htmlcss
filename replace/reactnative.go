@@ -185,12 +185,12 @@ func autoStyleTpl() string {
 
 	if myConfig.Params.React == "react" {
 		return `/* autoCssStart */
-let autoStyleFun = (...data)=>{
+const autoStyleFun = (...data)=>{
 	let _style = {}
 	if(data.length!=0){
 		` + modeStr + `
 		for(let i=1;i<data.length;i++){
-			_style = Object.assign(data[i]||{},_style);
+			_style = Object.assign(JSON.parse(JSON.stringify(data[i]||{})),_style);
 		}
 	}
 	return _style
@@ -200,12 +200,12 @@ const autoStyle=
 /* autoCssEnd */`
 	} else {
 		return `/* autoCssStart */
-let autoStyleFun = (...data)=>{
+const autoStyleFun = (...data)=>{
 	let _style = {}
 	if(data.length!=0){
 		` + modeStr + `
 		for(let i=1;i<data.length;i++){
-			_style = Object.assign(data[i]||{},_style);
+			_style = Object.assign(JSON.parse(JSON.stringify(data[i]||{})),_style);
 		}
 	}
 	return _style
