@@ -72,6 +72,9 @@ func preToUpper(before string) string {
 			willReturn += item
 		}
 	}
+	if strings.Contains(willReturn, "webkit") { //react厂家标识需要大写
+		willReturn = strings.Replace(willReturn, "webkit", "Webkit", -1)
+	}
 	return willReturn
 }
 func FindPathToString(path string) {
