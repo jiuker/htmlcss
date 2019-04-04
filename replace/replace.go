@@ -302,8 +302,17 @@ func BtyeToCss(fileBody []byte, path string) {
 	}
 }
 
+// @color = > #111
+func cssGlobalValueToCss(css string) string {
+	for key, value := range myConfig.Values {
+		css = strings.Replace(css, key, fmt.Sprintf("%v", value), -1)
+	}
+	return css
+}
+
 // width:10px => width:0.1rem
 func cssToCover(css string, compare []string) string {
+	css = cssGlobalValueToCss(css)
 	//转换成程序可识别的单位zzzz
 	//转换 已经识别的css：css
 	css = strings.Replace(css, "px", "zzzz", -1)

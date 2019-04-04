@@ -78,14 +78,16 @@ func FindPathToString(path string) {
 	file, err := os.OpenFile(path, os.O_RDWR, 0x666)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
+	defer file.Close()
 	fileBody, err := ioutil.ReadAll(file)
 	if err != nil {
 		fmt.Println(err)
 	}
 	css := map[string]map[string]string{}
 	for _, lineStyle := range findStyleNeedToAutoToArray(string(fileBody)) {
-		if myConfig.Params.ReactMode == "one" {
+		if myConfig.Params.ReactMode == "multiple" {
 			for attr, value := range cssStrToMapArr(lineStyle) {
 				css[attr] = value
 			}
@@ -171,7 +173,7 @@ func findOldAutoStyle(str string) string {
 }
 func autoStyleTpl() string {
 	modeStr := ""
-	if myConfig.Params.ReactMode == "one" {
+	if myConfig.Params.ReactMode == "multiple" {
 		modeStr = `_style = autoStyle[data[0]]||{};`
 	} else {
 		modeStr = `data[0].split(/ /g).filter((value,index)=>{

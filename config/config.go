@@ -1,7 +1,11 @@
 package config
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/larspensjo/config"
 )
@@ -24,6 +28,7 @@ type Conf struct {
 }
 
 var Params = Conf{}
+var Values = map[string]interface{}{}
 
 func init() {
 	cfg, err := config.ReadDefault("config.ini")
@@ -85,5 +90,25 @@ func init() {
 	Params.ReactMode, err = cfg.String("handle", "reactmode")
 	if err != nil {
 		log.Fatalln(err)
+	}
+	loadValue()
+}
+
+//加载全局属性
+func loadValue() {
+	valueFile, err := os.Open("value.ini")
+	if err != nil {
+		fmt.Println("没有value配置的文件")
+		return
+	}
+	defer valueFile.Close()
+	fileBodyByte, err := ioutil.ReadAll(valueFile)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(fileBodyByte, &Values)
+	if err != nil {
+		fmt.Println("解析value错误")
+		return
 	}
 }
