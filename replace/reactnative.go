@@ -180,7 +180,7 @@ func autoStyleTpl() string {
 		modeStr = `_style = autoStyle[data[0]]||{};`
 	} else {
 		modeStr = `data[0].split(/ /g).filter((value,index)=>{
-			return value!=''
+			return value!==''
 		}).forEach(value => {
 			_style = Object.assign({},_style, autoStyle[value]||{});
 		});`
@@ -190,7 +190,7 @@ func autoStyleTpl() string {
 		return `/* autoCssStart */
 const autoStyleFun = (...data)=>{
 	let _style = {}
-	if(data.length!=0){
+	if(data.length!==0){
 		` + modeStr + `
 		for(let i=1;i<data.length;i++){
 			_style = Object.assign({},_style,data[i]||{});
