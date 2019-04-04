@@ -421,7 +421,7 @@ var SyncJs = `if(true) { //debug js
     });
 	setTimeout(function(){
 		if(typeof api == "undefined"){
-			(apiready||function(){})()
+			(vueReady||function(){})()
 		}
 	},500)
 };
