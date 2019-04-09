@@ -37,26 +37,29 @@ func cssStrToMapArr(str string) (css map[string]map[string]string) {
 // h-20 =>  "height":"20px"
 func singleCssToMap(str string) (css map[string]string, success bool) {
 	css = map[string]string{}
-	for rp, rps := range commonRegexp {
-		for _, v2 := range rp.FindAllStringSubmatch(str, -1) { //有触发才会使得这个循环有效，也就是必然匹配了
-			for i, v3 := range v2 {
-				if i >= 1 {
-					rps = strings.Replace(rps, fmt.Sprintf("$%d", i), v3, -1)
+	for _, tv := range commonRegexp {
+		for rp, rps := range tv {
+			for _, v2 := range rp.FindAllStringSubmatch(str, -1) { //有触发才会使得这个循环有效，也就是必然匹配了
+				for i, v3 := range v2 {
+					if i >= 1 {
+						rps = strings.Replace(rps, fmt.Sprintf("$%d", i), v3, -1)
+					}
 				}
-			}
-			items := strings.SplitN(rps, ";", -1) //多个;分开显示
-			for _, item := range items {
-				cssTemp := strings.SplitN(item, ":", -1)
-				if len(cssTemp) != 2 {
-					continue
-				} else {
-					css[preToUpper(cssTemp[0])] = strings.Trim(strings.Replace(cssTemp[1], ";", "", -1), " ")
-					success = true
+				items := strings.SplitN(rps, ";", -1) //多个;分开显示
+				for _, item := range items {
+					cssTemp := strings.SplitN(item, ":", -1)
+					if len(cssTemp) != 2 {
+						continue
+					} else {
+						css[preToUpper(cssTemp[0])] = strings.Trim(strings.Replace(cssTemp[1], ";", "", -1), " ")
+						success = true
+					}
 				}
+				return
 			}
-			return
 		}
 	}
+
 	return
 }
 
@@ -110,6 +113,9 @@ func FindPathToString(path string) {
 		fmt.Println(err)
 	}
 	newAutoCss := cssToCover(fmt.Sprintf(autoStyleTpl(), string(cssByte)), []string{"", ""})
+	if myConfig.Params.React == "reactnative" {
+		newAutoCss = cssHandleWithNative(newAutoCss)
+	}
 	oldAutoStyleStr := findOldAutoStyle(string(fileBody))
 	if !isTheSame(oldAutoStyleStr, newAutoCss) {
 		//写入文件
@@ -144,6 +150,19 @@ func FindPathToString(path string) {
 		}
 		fmt.Println("findReact   ", path, "   changed!")
 	}
+}
+
+//reactnative font-size:"12px"->font-size:12
+func cssHandleWithNative(css string) string {
+	css = strings.Replace(css, "px", "", -1)
+	valueRegexp := regexp.MustCompile(`"(\d{1,6})"`)
+	css = valueRegexp.ReplaceAllStringFunc(css, func(b string) string {
+		b = strings.Replace(b, `"`, "", -1)
+		return b
+	})
+	css = strings.Replace(css, `"'`, `"`, -1) //fontWeight你叼
+	css = strings.Replace(css, `'"`, `"`, -1)
+	return css
 }
 func findStyleNeedToAutoToArray(str string) []string {
 	reg, err := regexp.Compile(`autoStyleFun\("([^"]+)"`)
@@ -188,6 +207,7 @@ func autoStyleTpl() string {
 
 	if myConfig.Params.React == "react" {
 		return `/* autoCssStart */
+/* eslint-disable */
 const autoStyleFun = (...data)=>{
 	let _style = {}
 	if(data.length!==0){
@@ -203,6 +223,7 @@ const autoStyle=
 /* autoCssEnd */`
 	} else {
 		return `/* autoCssStart */
+/* eslint-disable */
 const autoStyleFun = (...data)=>{
 	let _style = {}
 	if(data.length!=0){

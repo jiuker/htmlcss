@@ -237,7 +237,11 @@ func ListenAndServe() {
 	}
 }
 func init() {
-	osFile, err := os.Open("regexp.ext")
+	fileName := "regexp-reactnative.ext"
+	if myConfig.Params.React != "reactnative" {
+		fileName = "regexp.ext"
+	}
+	osFile, err := os.Open(fileName)
 	if err != nil {
 		SyncJs = strings.Replace(SyncJs, "insertHere", "", 1)
 		fmt.Println("不存在拓展文件regexp.ext!", err)

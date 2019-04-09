@@ -1,6 +1,7 @@
 package replace
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -18,7 +19,7 @@ import (
 	"strings"
 )
 
-var commonRegexp = map[*regexp.Regexp]string{}
+var commonRegexp = []map[*regexp.Regexp]string{}
 var Ctype = ""        //convert的auto,优先
 var BaseFloat float64 //convert的数值
 var Unit = ""         //convert的里面单位，px,rem,upx,
@@ -45,7 +46,7 @@ func Init() {
 	for _, v := range rp.FindAllStringSubmatch(myHttp.SyncJs, -1) {
 		for i1, v1 := range v {
 			if i1 == 1 {
-				rps = append(rps, strings.Replace(strings.Replace(v1, `"`, "", -1), `'`, "", -1))
+				rps = append(rps, strings.Replace(v1, `"`, "", -1))
 			}
 		}
 	}
@@ -54,7 +55,28 @@ func Init() {
 		os.Exit(0)
 	}
 	for i, v := range reps {
-		commonRegexp[regexp.MustCompile(v)] = rps[i]
+		commonRegexp = append(commonRegexp, map[*regexp.Regexp]string{
+			regexp.MustCompile(v): rps[i],
+		})
+	}
+	if myConfig.Params.React == "reactnative" {
+		//react-native单独走一个文件
+		lines := 0
+		osFile, err := os.Open("regexp-reactnative.ext")
+		if err != nil {
+			fmt.Println("不存在拓展文件regexp.ext!", err)
+			return
+		}
+		defer osFile.Close()
+		reader := bufio.NewReader(osFile)
+		for {
+			_, err := reader.ReadString('\n')
+			if err != nil {
+				break
+			}
+			lines++
+		}
+		commonRegexp = commonRegexp[0:lines]
 	}
 	//识别convert配置
 	convertArry := strings.SplitN(myConfig.Params.Convert, "[", 2)
@@ -162,18 +184,20 @@ func BtyeToCss(fileBody []byte, path string) {
 	}
 	defaultCssOutToArray := []string{}
 	for i, v := range defaultCssToArray {
-		for k1, v1 := range commonRegexp {
-			ss1 := k1.FindAllStringSubmatch(v, -1)
-			if len(ss1) != 0 {
-				var ss2 = v1
-				for i2, v2 := range ss1[0] {
-					if i2 >= 1 {
-						//数值替换
-						ss2 = strings.Replace(ss2, fmt.Sprintf("$%d", i2), v2, -1)
+		for _, tv := range commonRegexp {
+			for k1, v1 := range tv {
+				ss1 := k1.FindAllStringSubmatch(v, -1)
+				if len(ss1) != 0 {
+					var ss2 = v1
+					for i2, v2 := range ss1[0] {
+						if i2 >= 1 {
+							//数值替换
+							ss2 = strings.Replace(ss2, fmt.Sprintf("$%d", i2), v2, -1)
+						}
 					}
+					defaultCssOutToArray = append(defaultCssOutToArray, "."+defaultCssToArray[i]+"{"+ss2+"}")
+					break
 				}
-				defaultCssOutToArray = append(defaultCssOutToArray, "."+defaultCssToArray[i]+"{"+ss2+"}")
-				break
 			}
 		}
 	}
@@ -190,19 +214,21 @@ func BtyeToCss(fileBody []byte, path string) {
 	}
 	commonCssStr = strings.Replace(commonCssStr, "{", " { ", -1)
 	commonCssStr = strings.Replace(commonCssStr, "}", " } ", -1)
-	for k, v := range commonRegexp {
-		re := regexp.MustCompile(strings.Replace(strings.Replace(k.String(), "^", " ", -1), "$", " ", -1))
-		ss1 := re.FindAllStringSubmatch(commonCssStr, -1)
-		if len(ss1) != 0 {
+	for _, tv := range commonRegexp {
+		for k, v := range tv {
+			re := regexp.MustCompile(strings.Replace(strings.Replace(k.String(), "^", " ", -1), "$", " ", -1))
+			ss1 := re.FindAllStringSubmatch(commonCssStr, -1)
 			if len(ss1) != 0 {
-				var ss2 = v
-				for i2, v2 := range ss1[0] {
-					if i2 >= 1 {
-						//数值替换
-						ss2 = strings.Replace(ss2, fmt.Sprintf("$%d", i2), v2, -1)
+				if len(ss1) != 0 {
+					var ss2 = v
+					for i2, v2 := range ss1[0] {
+						if i2 >= 1 {
+							//数值替换
+							ss2 = strings.Replace(ss2, fmt.Sprintf("$%d", i2), v2, -1)
+						}
 					}
+					commonCssStr = strings.Replace(commonCssStr, ss1[0][0], " "+ss2+" ", -1)
 				}
-				commonCssStr = strings.Replace(commonCssStr, ss1[0][0], " "+ss2+" ", -1)
 			}
 		}
 	}
