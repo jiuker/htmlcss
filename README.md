@@ -1,7 +1,7 @@
 ## 效果图
-* ![普通网页](https://github.com/jiuker/htmlcss/images/normal.gif)
-* ![vue或者react](https://github.com/jiuker/htmlcss/images/vue.gif)
-* ![reactnative](https://github.com/jiuker/htmlcss/images/react-native.gif)
+* ![普通网页](https://github.com/jiuker/htmlcss/tree/master/images/normal.gif)
+* ![vue或者react](https://github.com/jiuker/htmlcss/tree/master/images/vue.gif)
+* ![reactnative](https://github.com/jiuker/htmlcss/tree/master/images/react-native.gif)
 ## 背景
 * 在这几年工作中针对css的书写和排查错误感受到通用性的css在开发过程中的变得很重要,less/sass等处理css也不是很方便。
 * 在工作写了很多类似class带属性值的class比如 w-20 w20等，于是萌生出是否可以用脚本使用正则去处理，经过两年的摸索，有了些许眉目。
