@@ -112,6 +112,9 @@ func FindPathToString(path string) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	if string(cssByte) == "{}" { //没有数据
+		return
+	}
 	newAutoCss := cssToCover(fmt.Sprintf(autoStyleTpl(), string(cssByte)), []string{"", ""})
 	if myConfig.Params.React == "reactnative" {
 		newAutoCss = cssHandleWithNative(newAutoCss)

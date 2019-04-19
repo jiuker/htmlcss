@@ -1,3 +1,4 @@
+d-f->display:flex
 c-([^-]{1,6})->color:#$1
 ff-([^-]{1,6})->fontFamily:$1
 fs-(\d{1,6})->fontSize:$1
