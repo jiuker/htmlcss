@@ -1,1 +1,2 @@
 wh-(\d{2,2})-(\d{2,2})->width:$1px;height:$2px
+m-c1->color:@color;
