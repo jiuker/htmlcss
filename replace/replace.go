@@ -98,15 +98,18 @@ func Init() {
 	BaseFloat = baseFloat
 	Unit = unit
 	//识别node节点
-	nodes := strings.SplitN(myConfig.Params.Node, "[", 2)
-	if len(nodes) != 2 {
-		log.Fatalln("node节点配置错误!")
-	}
-	nodes[1] = strings.Replace(nodes[1], "]", "", -1)
-	NodeName = nodes[0]
-	NodeNum, err = strconv.Atoi(nodes[1])
-	if err != nil {
-		log.Fatalln("node节点配置错误!")
+	if myConfig.Params.Node != "none" {
+		nodes := strings.SplitN(myConfig.Params.Node, "[", 2)
+		if len(nodes) != 2 {
+			log.Fatalln("node节点配置错误!")
+		} else {
+			nodes[1] = strings.Replace(nodes[1], "]", "", -1)
+			NodeName = nodes[0]
+			NodeNum, err = strconv.Atoi(nodes[1])
+			if err != nil {
+				log.Fatalln("node节点配置错误!")
+			}
+		}
 	}
 	//初始化css抓取点
 	for _, v := range strings.SplitN(myConfig.Params.Class, ",", -1) {
@@ -235,16 +238,20 @@ func BtyeToCss(fileBody []byte, path string) {
 	css = strings.Join(defaultCssOutToArray, "\n") + "\n" + commonCssStr
 	css = strings.Replace(css, " { ", "{", -1)
 	css = strings.Replace(css, " } ", "}", -1)
-	//获取需要比较的css：willCompareCss
-	styles := regexp.MustCompile("<style([^>]*)>([^<]*)</style>").FindAllStringSubmatch(fileBodyStr, -1)
-	if len(styles)-1 < NodeNum {
-		fmt.Println("找不到替换节点: ", path)
-		return
-	}
-	compare := styles[NodeNum]
-	// compare   all,attr,css
-	if len(compare) != 3 {
-		log.Println("节点数量异常: ", path)
+	styles := [][]string{}
+	compare := []string{"", "", ""}
+	if myConfig.Params.Node != "none" { //为空则需要找到比较
+		//获取需要比较的css：willCompareCss
+		styles = regexp.MustCompile("<style([^>]*)>([^<]*)</style>").FindAllStringSubmatch(fileBodyStr, -1)
+		if len(styles)-1 < NodeNum {
+			fmt.Println("找不到替换节点: ", path)
+			return
+		}
+		compare = styles[NodeNum]
+		// compare   all,attr,css
+		if len(compare) != 3 {
+			log.Println("节点数量异常: ", path)
+		}
 	}
 	willCompareCss := ""
 	cssSplitBefore := ""
