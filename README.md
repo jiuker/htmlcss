@@ -56,9 +56,10 @@ willInsertHere!
 ## react使用方式1
 * 引入外部css的方式
 * class配置参数为className
+* 参数node为none
 * replace为 write-../%s.css这种配置。%s为当前程序处理的文件名
 * react文件使用 import ("./%s.css")的类似方式
-* 触发样式则为className="d-wb h-40 w-40"这种
+* 触发样式则为className="d-wb h-40 w-40"
 ## react使用方式2
 * 内联样式的方法，会自动生成在文件末尾
 * 组件的style要写成 `style={autoStyleFun("d-wb wba-c h-40 w-40")}`这种方式
