@@ -113,3 +113,4 @@ r-con->resizeMode:contain
 r-s->resizeMode:stretch
 oc-([^-]{3,6})->overlayColor:#$1
 tc-([^-]{3,6})->tintColor:#$1
+header->width:30;height:50;backgroundColor:#fff

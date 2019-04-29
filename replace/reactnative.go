@@ -37,7 +37,7 @@ func cssStrToMapArr(str string) (css map[string]map[string]string) {
 // h-20 =>  "height":"20px"
 func singleCssToMap(str string) (css map[string]string, success bool) {
 	css = map[string]string{}
-	for _, tv := range commonRegexp {
+	for _, tv := range append(tempAutoStyle, commonRegexp...) {
 		for rp, rps := range tv {
 			for _, v2 := range rp.FindAllStringSubmatch(str, -1) { //有触发才会使得这个循环有效，也就是必然匹配了
 				for i, v3 := range v2 {
@@ -80,7 +80,51 @@ func preToUpper(before string) string {
 	}
 	return willReturn
 }
+
+var tempAutoStyle = []map[*regexp.Regexp]string{}
+
+// find tempAutoStyle footer{w-100 h-100}
+func findTempAutoStyle(path string) {
+	tempAutoStyle = []map[*regexp.Regexp]string{}
+	file, err := os.OpenFile(path, os.O_RDWR, 0x666)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	fileBody, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+	rp := regexp.MustCompile(fmt.Sprintf(`%s="([^"]+)"`, myConfig.Params.CommonClass))
+	tempAutoStyleArry := rp.FindAllStringSubmatch(string(fileBody), -1)
+	if len(tempAutoStyleArry) == 0 {
+		return
+	}
+	for _, v := range tempAutoStyleArry {
+		if len(v) != 2 { // all contentStyle --arr
+			continue
+		}
+		arrStyleSplits := strings.SplitN(v[1], "}", -1) // f{w-20 d{h-20 --arr
+		for _, v1 := range arrStyleSplits {             // f{w-20 --string
+			v2 := strings.SplitN(v1, "{", -1) // f w-20 --arr
+			if len(v2) != 2 {
+				continue
+			}
+			tempValue := ""                                     // tempAutoStyle --each map[xx]tempValue
+			for _, mapKeyValue := range cssStrToMapArr(v2[1]) { // width:20 --map
+				for key, value := range mapKeyValue { // key:value --map
+					tempValue += key + ":" + value + ";"
+				}
+			}
+			tempAutoStyle = append(tempAutoStyle, map[*regexp.Regexp]string{ // tempAutoStyle --push item
+				regexp.MustCompile(fmt.Sprintf(`^%s$`, strings.Replace(v2[0], " ", "", -1))): tempValue, // 去除空格，强制使用开始结束判断
+			})
+		}
+	}
+}
 func FindPathToString(path string) {
+	findTempAutoStyle(path)
 	file, err := os.OpenFile(path, os.O_RDWR, 0x666)
 	if err != nil {
 		fmt.Println(err)

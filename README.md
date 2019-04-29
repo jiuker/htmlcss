@@ -66,12 +66,16 @@ willInsertHere!
 * 不能使用autoStyleFun，autoStyle这两个命名
 * react的配置为react
 * reactmode根据需求配置为one/multiple
+* 此模式下commonCalss依然生效 例如 c-class="footer{h-10 w-10}" 然后就可以在 autoStyleFun()里面开始使用
+* 一些全局样式可以写在配置里面，比如header->display:flex;width:80;
 ## react-native使用方式
 * 内联样式的方法，会自动生成在文件末尾
 * 组件的style要写成 `style={autoStyleFun("d-wb wba-c h-40 w-40")}`这种方式
 * 不能使用autoStyleFun，autoStyle这两个命名
 * react的配置为reactnative
 * reactmode根据需求配置为one/multiple
+* 此模式下commonCalss依然生效 例如 c-class="footer{h-10 w-10}" 然后就可以在 autoStyleFun()里面开始使用
+* 一些全局样式可以写在配置里面，比如header->display:flex;width:80;
 ## 参数的简单解释
 ### 单位转换
 * 在配置文件里面convert=auto[2px]，那么 style节点加一个参数为 px="4"，那么实际以4px进行换算。配置里面单位是什么，单个文件里面的属性为这个才会生效。
