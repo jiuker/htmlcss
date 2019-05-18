@@ -114,3 +114,8 @@ r-s->resizeMode:stretch
 oc-([^-]{3,6})->overlayColor:#$1
 tc-([^-]{3,6})->tintColor:#$1
 header->width:30;height:50;backgroundColor:#fff
+t-rx(\d{1,4})->transform:[{rotateX:'$1deg'}]
+t-ry(\d{1,4})->transform:[{rotateY:'$1deg'}]
+so-(\d{1,4})-(\d{1,4})->shadowOffset:{width:$1,height:$2}
+t-tx(\d{1,4})->transform:[{translateX:$1}]
+t-ty(\d{1,4})->transform:[{translateY:$1}]

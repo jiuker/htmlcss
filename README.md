@@ -66,7 +66,8 @@ willInsertHere!
 * 不能使用autoStyleFun，autoStyle这两个命名
 * react的配置为react
 * reactmode根据需求配置为one/multiple
-* 此模式下commonCalss依然生效 例如 c-class="footer{h-10 w-10}" 然后就可以在 autoStyleFun()里面开始使用
+* 当reactmode为multiple的时候，需要在最前面加一个 autoStyleFun("","xxx footer xxx"),程序内部用了md5去实现key的生成（会截取一半），这样就能形成比较短的key，提升性能
+* 此模式下commonCalss依然生效 例如 c-class="footer{h-10 w-10}" 然后就可以在 autoStyleFun("xxx footer xxx")里面开始使用
 * 一些全局样式可以写在配置里面，比如header->display:flex;width:80;
 ## react-native使用方式
 * 内联样式的方法，会自动生成在文件末尾
@@ -96,8 +97,8 @@ willInsertHere!
 * 可以在配置里面使用value的配置参数,如 bgcColor->background:@bgc;color:@color; @color,@bgc在value配置里面配置
 ## tips
 * 页面里注释加上` class="w-20"`一样会被识别，可用作vue切换时，没有样式书写的地方
+* 非react页面里面，写 asd->asdasd}.test{asdad 会自动补全{}包裹，这样就能写一些after或者什么的
 # next
 * 重构部分逻辑，让维护不会那么困难（就是写得丑了）。
-* 增加拓展功能，让写拓展也是一种乐趣，比如增加动画联动，一句代码搞定什么的 myTransitton-10-20 -> @-webkit-transframe{0%{top:10px;}}。
 ## 讨论
 * qq群 941057162

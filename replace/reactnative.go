@@ -50,20 +50,6 @@ func singleCssToMap(str string) (css map[string]string, success bool) {
 	for _, tv := range append(tempAutoStyle, commonRegexp...) {
 		for rp, rps := range tv {
 			for _, v2 := range rp.FindAllStringSubmatch(str, -1) { //有触发才会使得这个循环有效，也就是必然匹配了
-				if strings.Contains(rps, "{") || strings.Contains(rps, "[") { // 包含{},这个是个对象,或者数组,当作字符串处理
-					cssTemp := strings.SplitN(rps, ":", 2)
-					if len(cssTemp) != 2 {
-						return
-					}
-					success = true
-					for i, v3 := range v2 {
-						if i >= 1 {
-							cssTemp[1] = strings.Replace(cssTemp[1], fmt.Sprintf("$%d", i), v3, -1)
-						}
-					}
-					css[preToUpper(cssTemp[0])] = strings.Trim(cssTemp[1], " ")
-					return
-				}
 				for i, v3 := range v2 {
 					if i >= 1 {
 						rps = strings.Replace(rps, fmt.Sprintf("$%d", i), v3, -1)
@@ -71,7 +57,7 @@ func singleCssToMap(str string) (css map[string]string, success bool) {
 				}
 				items := strings.SplitN(rps, ";", -1) //多个;分开显示
 				for _, item := range items {
-					cssTemp := strings.SplitN(item, ":", -1)
+					cssTemp := strings.SplitN(item, ":", 2)
 					if len(cssTemp) != 2 {
 						continue
 					} else {
@@ -190,8 +176,8 @@ func FindPathToString(path string) {
 	oldAutoStyleStr := findOldAutoStyle(string(fileBody))
 	if !isTheSame(oldAutoStyleStr, newAutoCss) {
 		bodyStr := string(fileBody)
-		//处理数据
-		reg := regexp.MustCompile(`autoStyleFun\("[^"]+","([^"]+)"`)
+		//处理数据 需要md5生成key
+		reg := regexp.MustCompile(`autoStyleFun\("[^"]*","([^"]+)"`)
 		if myConfig.Params.ReactMode == "multiple" {
 			for _, v := range reg.FindAllStringSubmatch(bodyStr, -1) {
 				if len(v) != 2 {
@@ -258,7 +244,8 @@ func cssHandleWithNative(css string) string {
 func findStyleNeedToAutoToArray(str string) []string {
 	reg := &regexp.Regexp{}
 	if myConfig.Params.ReactMode == "multiple" {
-		reg = regexp.MustCompile(`autoStyleFun\("[^"]+","([^"]+)"`)
+		//需要一个占位的""来储存自动生成的key
+		reg = regexp.MustCompile(`autoStyleFun\("[^"]*","([^"]+)"`)
 	} else {
 		reg = regexp.MustCompile(`autoStyleFun\("([^"]+)"`)
 	}
@@ -270,7 +257,6 @@ func findStyleNeedToAutoToArray(str string) []string {
 		cssArry = append(cssArry, v[1])
 	}
 	return cssArry
-	//todo 去重
 }
 func findOldAutoStyle(str string) string {
 	strs := strings.Split(str, `/* autoCssStart */`)
@@ -289,6 +275,7 @@ func findOldAutoStyle(str string) string {
 func autoStyleTpl() string {
 	index := "1"
 	if myConfig.Params.ReactMode == "multiple" {
+		//这个是为了让输入的样式形成一个提示信息而已，one比较短不需要md5生成key
 		index = "2"
 	}
 	modeStr := ""
