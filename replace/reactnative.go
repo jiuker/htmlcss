@@ -1,6 +1,8 @@
 package replace
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -27,7 +29,15 @@ func cssStrToMapArr(str string) (css map[string]map[string]string) {
 				if _, exit := css[str]; !exit {
 					css[str] = map[string]string{}
 				}
-				css[str][attr] = value
+				if attr == "transform" && css[str][attr] != "" { //处理动画的数组合并
+					css[str][attr] = strings.Replace(css[str][attr], "[", "", -1)
+					css[str][attr] = strings.Replace(css[str][attr], "]", "", -1)
+					value = strings.Replace(value, "[", "", -1)
+					value = strings.Replace(value, "]", "", -1)
+					css[str][attr] = "[" + css[str][attr] + "," + value + "]"
+				} else {
+					css[str][attr] = value
+				}
 			}
 		}
 	}
@@ -40,6 +50,20 @@ func singleCssToMap(str string) (css map[string]string, success bool) {
 	for _, tv := range append(tempAutoStyle, commonRegexp...) {
 		for rp, rps := range tv {
 			for _, v2 := range rp.FindAllStringSubmatch(str, -1) { //有触发才会使得这个循环有效，也就是必然匹配了
+				if strings.Contains(rps, "{") || strings.Contains(rps, "[") { // 包含{},这个是个对象,或者数组,当作字符串处理
+					cssTemp := strings.SplitN(rps, ":", 2)
+					if len(cssTemp) != 2 {
+						return
+					}
+					success = true
+					for i, v3 := range v2 {
+						if i >= 1 {
+							cssTemp[1] = strings.Replace(cssTemp[1], fmt.Sprintf("$%d", i), v3, -1)
+						}
+					}
+					css[preToUpper(cssTemp[0])] = strings.Trim(cssTemp[1], " ")
+					return
+				}
 				for i, v3 := range v2 {
 					if i >= 1 {
 						rps = strings.Replace(rps, fmt.Sprintf("$%d", i), v3, -1)
@@ -139,7 +163,7 @@ func FindPathToString(path string) {
 	for _, lineStyle := range findStyleNeedToAutoToArray(string(fileBody)) {
 		if myConfig.Params.ReactMode == "multiple" {
 			for attr, value := range cssStrToMapArr(lineStyle) {
-				css[attr] = value
+				css[md5Attr(attr)] = value
 			}
 		} else {
 			lineStyleOneS := strings.SplitN(lineStyle, " ", -1) // "w-20 h-20" => ["w-20" "h-20"]
@@ -165,10 +189,21 @@ func FindPathToString(path string) {
 	}
 	oldAutoStyleStr := findOldAutoStyle(string(fileBody))
 	if !isTheSame(oldAutoStyleStr, newAutoCss) {
+		bodyStr := string(fileBody)
+		//处理数据
+		reg := regexp.MustCompile(`autoStyleFun\("[^"]+","([^"]+)"`)
+		if myConfig.Params.ReactMode == "multiple" {
+			for _, v := range reg.FindAllStringSubmatch(bodyStr, -1) {
+				if len(v) != 2 {
+					continue
+				}
+				bodyStr = strings.Replace(bodyStr, v[0], `autoStyleFun("`+md5Attr(v[1])+`","`+v[1]+`"`, -1)
+			}
+		}
 		//写入文件
 		if oldAutoStyleStr == "" {
 			//没有该自动输出的模板
-			fileBodyStr := string(fileBody) + "\r\n" + newAutoCss
+			fileBodyStr := bodyStr + "\r\n" + newAutoCss
 			file1, err := os.OpenFile(path, os.O_TRUNC|os.O_RDWR, 0x666)
 			if err != nil {
 				fmt.Println(err)
@@ -183,7 +218,7 @@ func FindPathToString(path string) {
 			fmt.Println("findReact   ", path, "   changed!")
 			return
 		}
-		fileBodyStr := strings.Replace(string(fileBody), oldAutoStyleStr, newAutoCss, -1)
+		fileBodyStr := strings.Replace(bodyStr, oldAutoStyleStr, newAutoCss, -1)
 		file1, err := os.OpenFile(path, os.O_TRUNC|os.O_RDWR, 0x666)
 		if err != nil {
 			fmt.Println(err)
@@ -207,14 +242,25 @@ func cssHandleWithNative(css string) string {
 		b = strings.Replace(b, `"`, "", -1)
 		return b
 	})
-	css = strings.Replace(css, `"'`, `"`, -1) //fontWeight你叼
+	//处理''包裹的值为string,fontWeight为特殊一点
+	css = strings.Replace(css, `"'`, `"`, -1)
 	css = strings.Replace(css, `'"`, `"`, -1)
+	//处理数组或者对象
+	css = strings.Replace(css, `"{`, `{`, -1)
+	css = strings.Replace(css, `}"`, `}`, -1)
+	css = strings.Replace(css, `"[`, `[`, -1)
+	css = strings.Replace(css, `]"`, `]`, -1)
+	//处理bool值
+	css = strings.Replace(css, `"true"`, `true`, -1)
+	css = strings.Replace(css, `"false"`, `false`, -1)
 	return css
 }
 func findStyleNeedToAutoToArray(str string) []string {
-	reg, err := regexp.Compile(`autoStyleFun\("([^"]+)"`)
-	if err != nil {
-		fmt.Println(err)
+	reg := &regexp.Regexp{}
+	if myConfig.Params.ReactMode == "multiple" {
+		reg = regexp.MustCompile(`autoStyleFun\("[^"]+","([^"]+)"`)
+	} else {
+		reg = regexp.MustCompile(`autoStyleFun\("([^"]+)"`)
 	}
 	cssArry := []string{}
 	for _, v := range reg.FindAllStringSubmatch(str, -1) {
@@ -241,6 +287,10 @@ func findOldAutoStyle(str string) string {
 	return ""
 }
 func autoStyleTpl() string {
+	index := "1"
+	if myConfig.Params.ReactMode == "multiple" {
+		index = "2"
+	}
 	modeStr := ""
 	if myConfig.Params.ReactMode == "multiple" {
 		modeStr = `_style = autoStyle[data[0]]||{};`
@@ -259,7 +309,7 @@ const autoStyleFun = (...data)=>{
 	let _style = {}
 	if(data.length!==0){
 		` + modeStr + `
-		for(let i=1;i<data.length;i++){
+		for(let i=` + index + `;i<data.length;i++){
 			_style = Object.assign({},_style,data[i]||{});
 		}
 	}
@@ -275,7 +325,7 @@ const autoStyleFun = (...data)=>{
 	let _style = {}
 	if(data.length!=0){
 		` + modeStr + `
-		for(let i=1;i<data.length;i++){
+		for(let i=` + index + `;i<data.length;i++){
 			_style = Object.assign({},_style,data[i]||{});
 		}
 	}
@@ -286,6 +336,13 @@ const autoStyle=StyleSheet.create(%s);
 	}
 }
 
+// 处理multiple key值过长的问题
+func md5Attr(before string) string {
+	h := md5.New()
+	h.Write([]byte(before))
+	md5Str := hex.EncodeToString(h.Sum(nil))
+	return md5Str[0 : len(md5Str)/2]
+}
 func isTheSame(str, str1 string) (same bool) {
 	compareStr := `1234567890-=qwertyuiop[]\asdfghjkl;'zxcvbnm,./!*@`
 	for _, v := range compareStr {
